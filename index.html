@@ -1,48 +1,63 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Calcul Rolls</title>
-</head>
+function calcul(){
 
-<body>
+    let type = document.getElementById("type").value.split(",");
+    let longueurTotale = parseFloat(type[0]);
+    let largeur = parseFloat(type[1]);
 
-    <h1>Calcul des Dimensions</h1>
+    let longueurRestante = longueurTotale;
 
-    <!-- Référence -->
-    <label>Référence :</label><br>
-    <input type="text" id="reference"><br><br>
+    let totalGlobal = 0;
+    let tbody = document.querySelector("#detail tbody");
+    tbody.innerHTML = "";
 
-    <!-- Largeur -->
-    <label>Largeur (cm) :</label><br>
-    <input type="number" id="largeur"><br><br>
+    document.querySelectorAll(".ref").forEach((ref, index) => {
 
-    <!-- Longueur -->
-    <label>Longueur (cm) :</label><br>
-    <input type="number" id="longueur"><br><br>
+        if(longueurRestante <= 0) return;
 
-    <!-- Bouton -->
-    <button onclick="calculer()">Calculer</button>
+        let nom = ref.querySelector(".nomRef").value || ("R"+(index+1));
 
-    <h2>Résultat :</h2>
-    <p id="resultat"></p>
+        let d = parseFloat(ref.querySelector(".diametre").value) / 100;
+        let lr = parseFloat(ref.querySelector(".largeurRoll").value) / 100;
 
-    <script>
-        function calculer() {
-            let ref = document.getElementById("reference").value;
-            let largeur = parseFloat(document.getElementById("largeur").value);
-            let longueur = parseFloat(document.getElementById("longueur").value);
+        let nbLargeur = Math.floor(largeur / d);
+        let rollsParBloc = 0;
+        let typeBloc = "";
 
-            // Calcul surface en cm²
-            let surface = largeur * longueur;
-
-            document.getElementById("resultat").innerHTML =
-                "Référence : " + ref + "<br>" +
-                "Largeur : " + largeur + " cm<br>" +
-                "Longueur : " + longueur + " cm<br>" +
-                "Surface : " + surface + " cm²";
+        if(nbLargeur == 2){
+            rollsParBloc = 5;
+            typeBloc = "Pyramide";
+        } else if(nbLargeur >= 3){
+            rollsParBloc = 8;
+            typeBloc = "Pile";
+        } else {
+            rollsParBloc = nbLargeur;
+            typeBloc = "Simple";
         }
-    </script>
 
-</body>
-</html>
+        let nbLongueurMax = Math.floor(longueurRestante / lr);
+
+        let total = nbLongueurMax * rollsParBloc;
+
+        totalGlobal += total;
+
+        longueurRestante -= nbLongueurMax * lr;
+
+        let row = `
+        <tr>
+        <td>${nom}</td>
+        <td>${(d*100).toFixed(0)} cm</td>
+        <td>${typeBloc} (${rollsParBloc})</td>
+        <td>${nbLongueurMax}</td>
+        <td>${total}</td>
+        </tr>
+        `;
+
+        tbody.innerHTML += row;
+
+    });
+
+    document.getElementById("resultat").innerText =
+        "✅ Total réel = " + totalGlobal + " rolls";
+
+    document.getElementById("detail").style.display = "table";
+}
