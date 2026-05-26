@@ -1,65 +1,13 @@
-function calcul(){
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Calculateur Rolls Transport PRO</title>
 
-    let type = document.getElementById("type").value.split(",");
-    let longueurTotale = parseFloat(type[0]);
-    let largeur = parseFloat(type[1]);
-
-    let longueurRestante = longueurTotale;
-
-    let totalGlobal = 0;
-    let tbody = document.querySelector("#detail tbody");
-    tbody.innerHTML = "";
-
-    document.querySelectorAll(".ref").forEach((ref, index) => {
-
-        if(longueurRestante <= 0) return;
-
-        let nom = ref.querySelector(".nomRef").value || ("R"+(index+1));
-
-        let d = parseFloat(ref.querySelector(".diametre").value) / 100;
-        let lr = parseFloat(ref.querySelector(".largeurRoll").value) / 100;
-
-        let nbLargeur = Math.floor(largeur / d);
-        let rollsParBloc = 0;
-        let typeBloc = "";
-
-        if(nbLargeur == 2){
-            rollsParBloc = 5;
-            typeBloc = "Pyramide";
-        } else if(nbLargeur >= 3){
-            rollsParBloc = 8;
-            typeBloc = "Pile";
-        } else {
-            rollsParBloc = nbLargeur;
-            typeBloc = "Simple";
-        }
-
-        // ✅ combien de longueurs possibles avec ce produit MAIS limité par restant
-        let nbLongueurMax = Math.floor(longueurRestante / lr);
-
-        let total = nbLongueurMax * rollsParBloc;
-
-        totalGlobal += total;
-
-        // ✅ on retire la place utilisée
-        longueurRestante -= nbLongueurMax * lr;
-
-        let row = `
-        <tr>
-        <td>${nom}</td>
-        <td>${(d*100).toFixed(0)} cm</td>
-        <td>${typeBloc} (${rollsParBloc})</td>
-        <td>${nbLongueurMax}</td>
-        <td>${total}</td>
-        </tr>
-        `;
-
-        tbody.innerHTML += row;
-
-    });
-
-    document.getElementById("resultat").innerText =
-        "✅ Total réel = " + totalGlobal + " rolls";
-
-    document.getElementById("detail").style.display = "table";
-}
+<style>
+body {font-family: Arial; background:#f2f2f2; padding:20px;}
+.box {background:white; padding:20px; border-radius:10px; max-width:800px; margin:auto;}
+input, select {width:100%; padding:8px; margin-bottom:10px;}
+button {padding:10px; margin:5px 0; background:#0078d4; color:white; border:none;}
+.ref {border:1px solid #ddd; padding:10px; margin-bottom:10px;}
+.table {width:100%; margin-top:15px; border-collapse:collapse;}
