@@ -11,3 +11,148 @@ input, select {width:100%; padding:8px; margin-bottom:10px;}
 button {padding:10px; margin:5px 0; background:#0078d4; color:white; border:none;}
 .ref {border:1px solid #ddd; padding:10px; margin-bottom:10px;}
 .table {width:100%; margin-top:15px; border-collapse:collapse;}
+.table th, .table td {border:1px solid #ddd; padding:8px; text-align:center;}
+.result {font-size:20px; font-weight:bold; margin-top:10px;}
+</style>
+
+</head>
+
+<body>
+
+<div class="box">
+
+<h2>📦 Calculateur Rolls Transport (version réelle)</h2>
+
+<select id="type">
+<option value="13.6,2.45">Semi-Remorque (13.6 x 2.45)</option>
+<option value="13.58,2.35">45' HC</option>
+<option value="12,2.35">40' HC</option>
+<option value="12,2.35">40' DV</option>
+<option value="5.9,2.35">20' DV</option>
+</select>
+
+<div id="refs"></div>
+
+<button onclick="addRef()">➕ Ajouter référence</button>
+<button onclick="calcul()">🧮 Calculer</button>
+
+<div class="result" id="resultat"></div>
+
+<table class="table" id="detail" style="display:none;">
+<thead>
+<tr>
+<th>Réf</th>
+<th>Ø (mm)</th>
+<th>Bloc</th>
+<th>Longueur utilisée</th>
+<th>Total rolls</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+</div>
+
+<script>
+
+let maxRef = 6;
+
+function addRef(){
+    let container = document.getElementById("refs");
+    if(container.children.length >= maxRef) return;
+
+    let div = document.createElement("div");
+    div.className = "ref";
+
+    div.innerHTML = `
+    <h4>Référence ${container.children.length+1}</h4>
+
+    Nom / Code
+    <input type="text" class="nomRef" placeholder="Ex: CLI123">
+
+    Diamètre (mm)
+    <input type="number" class="diametre" value="800">
+
+    Largeur roll (mm)
+    <input type="number" class="largeurRoll" value="1200">
+    `;
+
+    container.appendChild(div);
+}
+
+function calcul(){
+
+    let type = document.getElementById("type").value.split(",");
+    let longueurTotale = parseFloat(type[0]);
+    let largeur = parseFloat(type[1]);
+
+    let longueurRestante = longueurTotale;
+
+    let totalGlobal = 0;
+    let tbody = document.querySelector("#detail tbody");
+    tbody.innerHTML = "";
+
+    document.querySelectorAll(".ref").forEach((ref, index) => {
+
+        if(longueurRestante <= 0) return;
+
+        let nom = ref.querySelector(".nomRef").value || ("R"+(index+1));
+
+        let d = parseFloat(ref.querySelector(".diametre").value) / 1000;
+        let lr = parseFloat(ref.querySelector(".largeurRoll").value) / 1000;
+
+        let nbLargeur = Math.floor(largeur / d);
+
+        let rollsParBloc = 0;
+        let typeBloc = "";
+
+        if(nbLargeur == 2){
+            rollsParBloc = 5;
+            typeBloc = "Pyramide (2-1-2)";
+        }
+        else if(nbLargeur >= 3){
+            rollsParBloc = 8;
+            typeBloc = "Pile (3-2-3)";
+        }
+        else{
+            rollsParBloc = nbLargeur;
+            typeBloc = "Simple";
+        }
+
+        let nbLongueur = Math.floor(longueurRestante / lr);
+
+        let total = nbLongueur * rollsParBloc;
+
+        totalGlobal += total;
+
+        let longueurUtilisee = nbLongueur * lr;
+
+        longueurRestante -= longueurUtilisee;
+
+        let row = `
+        <tr>
+        <td>${nom}</td>
+        <td>${d*1000}</td>
+        <td>${typeBloc}</td>
+        <td>${longueurUtilisee.toFixed(2)} m</td>
+        <td>${total}</td>
+        </tr>
+        `;
+
+        tbody.innerHTML += row;
+
+    });
+
+    document.getElementById("resultat").innerText =
+        "✅ Total réel = " + totalGlobal + " rolls | Longueur restante = " + longueurRestante.toFixed(2) + " m";
+
+    document.getElementById("detail").style.display = "table";
+}
+
+// 1 ref par défaut
+addRef();
+
+</script>
+
+</body>
+</html>
