@@ -34,12 +34,14 @@ function calcul(){
             typeBloc = "Simple";
         }
 
+        // ✅ combien de longueurs possibles avec ce produit MAIS limité par restant
         let nbLongueurMax = Math.floor(longueurRestante / lr);
 
         let total = nbLongueurMax * rollsParBloc;
 
         totalGlobal += total;
 
+        // ✅ on retire la place utilisée
         longueurRestante -= nbLongueurMax * lr;
 
         let row = `
