@@ -1,142 +1,48 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Calculateur Rolls PRO</title>
-
-<style>
-body {font-family: Arial; background:#f2f2f2; padding:20px;}
-.box {background:white; padding:20px; border-radius:10px; max-width:750px; margin:auto;}
-input, select {width:100%; padding:8px; margin-bottom:10px;}
-button {padding:10px; margin-top:5px; background:#0078d4; color:white; border:none;}
-.ref {border:1px solid #ddd; padding:10px; margin-bottom:10px;}
-.result {font-size:20px; font-weight:bold;}
-.table {width:100%; margin-top:15px; border-collapse:collapse;}
-.table th, .table td {border:1px solid #ddd; padding:8px; text-align:center;}
-</style>
+    <meta charset="UTF-8">
+    <title>Calcul Rolls</title>
 </head>
 
 <body>
 
-<div class="box">
-<h2>📦 Calculateur Rolls Transport PRO</h2>
+    <h1>Calcul des Dimensions</h1>
 
-<select id="type">
-<option value="13.6,2.45,2.7">Semi-Remorque</option>
-<option value="13.58,2.35,2.69">45' HC</option>
-<option value="12,2.35,2.69">40' HC</option>
-<option value="12,2.35,2.39">40' DV</option>
-<option value="5.9,2.35,2.39">20' DV</option>
-</select>
+    <!-- Référence -->
+    <label>Référence :</label><br>
+    <input type="text" id="reference"><br><br>
 
-<div id="refs"></div>
+    <!-- Largeur -->
+    <label>Largeur (cm) :</label><br>
+    <input type="number" id="largeur"><br><br>
 
-<button onclick="addRef()">➕ Ajouter référence</button>
-<button onclick="calcul()">🧮 Calculer</button>
+    <!-- Longueur -->
+    <label>Longueur (cm) :</label><br>
+    <input type="number" id="longueur"><br><br>
 
-<h3 id="resultat"></h3>
+    <!-- Bouton -->
+    <button onclick="calculer()">Calculer</button>
 
-<table class="table" id="detail" style="display:none;">
-<thead>
-<tr>
-<th>Réf</th>
-<th>Ø</th>
-<th>Bloc</th>
-<th>Longueur</th>
-<th>Couches</th>
-<th>Total</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
+    <h2>Résultat :</h2>
+    <p id="resultat"></p>
 
-</div>
+    <script>
+        function calculer() {
+            let ref = document.getElementById("reference").value;
+            let largeur = parseFloat(document.getElementById("largeur").value);
+            let longueur = parseFloat(document.getElementById("longueur").value);
 
-<script>
+            // Calcul surface en cm²
+            let surface = largeur * longueur;
 
-let maxRef = 6;
-
-function addRef(){
-    let container = document.getElementById("refs");
-    if(container.children.length >= maxRef) return;
-
-    let div = document.createElement("div");
-    div.className = "ref";
-
-    div.innerHTML = `
-    <h4>Référence ${container.children.length+1}</h4>
-    Diamètre (m)
-    <input type="number" step="0.01" class="diametre" value="0.60">
-    Largeur roll (m)
-    <input type="number" step="0.01" class="largeurRoll" value="1.20">
-    `;
-
-    container.appendChild(div);
-}
-
-function calcul(){
-
-    let type = document.getElementById("type").value.split(",");
-    let longueur = parseFloat(type[0]);
-    let largeur = parseFloat(type[1]);
-    let hauteur = parseFloat(type[2]);
-
-    let totalGlobal = 0;
-    let tbody = document.querySelector("#detail tbody");
-    tbody.innerHTML = "";
-
-    document.querySelectorAll(".ref").forEach((ref, index) => {
-
-        let d = parseFloat(ref.querySelector(".diametre").value);
-        let lr = parseFloat(ref.querySelector(".largeurRoll").value);
-
-        let nbLargeur = Math.floor(largeur / d);
-        let rollsParBloc = 0;
-        let typeBloc = "";
-
-        if(nbLargeur == 2){
-            rollsParBloc = 5;
-            typeBloc = "Pyramide";
-        } else if(nbLargeur >= 3){
-            rollsParBloc = 8;
-            typeBloc = "Pile";
-        } else {
-            rollsParBloc = nbLargeur;
-            typeBloc = "Simple";
+            document.getElementById("resultat").innerHTML =
+                "Référence : " + ref + "<br>" +
+                "Largeur : " + largeur + " cm<br>" +
+                "Longueur : " + longueur + " cm<br>" +
+                "Surface : " + surface + " cm²";
         }
-
-        let nbLongueur = Math.floor(longueur / lr);
-        let couches = Math.min(3, Math.floor(hauteur / d));
-
-        let total = nbLongueur * rollsParBloc * couches;
-
-        totalGlobal += total;
-
-        // ajouter ligne tableau
-        let row = `
-        <tr>
-        <td>R${index+1}</td>
-        <td>${d}</td>
-        <td>${typeBloc} (${rollsParBloc})</td>
-        <td>${nbLongueur}</td>
-        <td>${couches}</td>
-        <td>${total}</td>
-        </tr>
-        `;
-
-        tbody.innerHTML += row;
-
-    });
-
-    document.getElementById("resultat").innerText =
-        "✅ Total global = " + totalGlobal + " rolls";
-
-    document.getElementById("detail").style.display = "table";
-}
-
-addRef();
-
-</script>
+    </script>
 
 </body>
 </html>
