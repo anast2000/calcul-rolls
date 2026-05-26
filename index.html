@@ -15,7 +15,6 @@ button {padding:10px; margin:5px 0; background:#0078d4; color:white; border:none
 .result {font-size:20px; font-weight:bold; margin-top:10px;}
 #comparatif {margin-top:20px;}
 </style>
-
 </head>
 
 <body>
@@ -25,11 +24,11 @@ button {padding:10px; margin:5px 0; background:#0078d4; color:white; border:none
 <h2>📦 Calculateur Rolls Transport (version réelle)</h2>
 
 <select id="type">
-<option value="13.6,2.45">Semi-Remorque (13.6 x 2.45)</option>
-<option value="13.58,2.35">45' HC</option>
-<option value="12,2.35">40' HC</option>
-<option value="12,2.35">40' DV</option>
-<option value="5.9,2.35">20' DV</option>
+<option value="13.6,2.45">🚚 Semi-Remorque (13.6 x 2.45)</option>
+<option value="13.58,2.35">📦 45' HC</option>
+<option value="12,2.35">📦 40' HC</option>
+<option value="12,2.35">📦 40' DV</option>
+<option value="5.9,2.35">📦 20' DV</option>
 </select>
 
 <div id="refs"></div>
@@ -37,7 +36,7 @@ button {padding:10px; margin:5px 0; background:#0078d4; color:white; border:none
 <button onclick="addRef()">➕ Ajouter référence</button>
 <button onclick="calcul()">🧮 Calculer</button>
 <button onclick="optimiser()">🚀 Optimiser</button>
-<button onclick="comparer()">📊 Comparer transports</button>
+<button onclick="comparer()">📊 Comparer</button>
 
 <div class="result" id="resultat"></div>
 
@@ -125,9 +124,21 @@ function calcul(){
             return;
         }
 
-        let rollsParBloc = (nbLargeur == 2) ? 5 : (nbLargeur >= 3 ? 8 : nbLargeur);
-        let typeBloc = (nbLargeur == 2) ? "Pyramide (2-1-2)" :
+        let rollsParBloc;
+        let typeBloc;
+
+        // ✅ SEMI → pyramide réelle
+        if(longueurTotale == 13.6){
+            rollsParBloc = (nbLargeur * (nbLargeur + 1)) / 2;
+            typeBloc = "Pyramide réelle";
+        }
+        else{
+            rollsParBloc = (nbLargeur == 2) ? 5 :
+                           (nbLargeur >= 3 ? 8 : nbLargeur);
+
+            typeBloc = (nbLargeur == 2) ? "Pyramide (2-1-2)" :
                        (nbLargeur >= 3 ? "Pile (3-2-3)" : "Simple");
+        }
 
         let nbBlocs = Math.ceil(quantite / rollsParBloc);
         let longueurUtilisee = nbBlocs * lr;
@@ -177,7 +188,15 @@ function optimiser(){
         let nbLargeur = Math.floor(largeur / d);
         if(nbLargeur === 0) return;
 
-        let rollsParBloc = (nbLargeur == 2) ? 5 : (nbLargeur >= 3 ? 8 : nbLargeur);
+        let rollsParBloc;
+
+        if(longueurTotale == 13.6){
+            rollsParBloc = (nbLargeur * (nbLargeur + 1)) / 2;
+        } else {
+            rollsParBloc = (nbLargeur == 2) ? 5 :
+                           (nbLargeur >= 3 ? 8 : nbLargeur);
+        }
+
         let rendement = rollsParBloc / lr;
 
         refs.push({nom, d, lr, rollsParBloc, rendement});
@@ -206,9 +225,9 @@ function optimiser(){
         <td>${ref.nom}</td>
         <td>${ref.d*1000}</td>
         <td>MAX</td>
-        <td>Auto</td>
+        <td>Optimisé</td>
         <td>${longueurUtilisee.toFixed(2)} m</td>
-        <td>✅ Optimisé</td>
+        <td>✅</td>
         </tr>`;
     });
 
@@ -244,7 +263,14 @@ function comparer(){
             let nbLargeur = Math.floor(t.l / d);
             if(nbLargeur === 0) return;
 
-            let rollsParBloc = (nbLargeur == 2) ? 5 : (nbLargeur >= 3 ? 8 : nbLargeur);
+            let rollsParBloc;
+
+            if(t.L == 13.6){
+                rollsParBloc = (nbLargeur * (nbLargeur + 1)) / 2;
+            } else {
+                rollsParBloc = (nbLargeur == 2) ? 5 :
+                               (nbLargeur >= 3 ? 8 : nbLargeur);
+            }
 
             let nbBlocs = Math.floor(longueurRestante / lr);
             let total = nbBlocs * rollsParBloc;
@@ -254,7 +280,7 @@ function comparer(){
 
         });
 
-        html += `<p>${t.nom} → ${totalGlobal} rolls (reste ${longueurRestante.toFixed(2)} m)</p>`;
+        html += `<p>${t.nom} → ${totalGlobal} rolls</p>`;
 
         if(totalGlobal > max){
             max = totalGlobal;
@@ -268,7 +294,7 @@ function comparer(){
     document.getElementById("comparatif").innerHTML = html;
 }
 
-// démarre avec 1 ref
+// démarrage
 addRef();
 
 </script>
