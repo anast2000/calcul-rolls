@@ -43,9 +43,10 @@ button {padding:10px; margin:5px 0; background:#0078d4; color:white; border:none
 <tr>
 <th>Réf</th>
 <th>Ø (mm)</th>
+<th>Quantité demandée</th>
 <th>Bloc</th>
 <th>Longueur utilisée</th>
-<th>Total rolls</th>
+<th>Status</th>
 </tr>
 </thead>
 <tbody></tbody>
@@ -75,6 +76,9 @@ function addRef(){
 
     Largeur roll (mm)
     <input type="number" class="largeurRoll" value="1200">
+
+    Quantité demandée
+    <input type="number" class="quantite" placeholder="Ex: 15">
     `;
 
     container.appendChild(div);
@@ -94,15 +98,30 @@ function calcul(){
 
     document.querySelectorAll(".ref").forEach((ref, index) => {
 
-        if(longueurRestante <= 0) return;
-
         let nom = ref.querySelector(".nomRef").value || ("R"+(index+1));
 
         let d = parseFloat(ref.querySelector(".diametre").value) / 1000;
         let lr = parseFloat(ref.querySelector(".largeurRoll").value) / 1000;
+        let quantite = parseInt(ref.querySelector(".quantite").value) || 0;
+
+        if(quantite === 0) return;
 
         let nbLargeur = Math.floor(largeur / d);
 
+        if(nbLargeur === 0){
+            tbody.innerHTML += `
+            <tr>
+            <td>${nom}</td>
+            <td>${d*1000}</td>
+            <td>${quantite}</td>
+            <td>-</td>
+            <td>0 m</td>
+            <td>❌ Trop large</td>
+            </tr>`;
+            return;
+        }
+
+        // logique blocs gardée
         let rollsParBloc = 0;
         let typeBloc = "";
 
@@ -119,23 +138,26 @@ function calcul(){
             typeBloc = "Simple";
         }
 
-        let nbLongueur = Math.floor(longueurRestante / lr);
+        // combien de blocs nécessaires pour atteindre la quantité demandée
+        let nbBlocs = Math.ceil(quantite / rollsParBloc);
 
-        let total = nbLongueur * rollsParBloc;
+        let longueurUtilisee = nbBlocs * lr;
 
-        totalGlobal += total;
+        let rentre = longueurUtilisee <= longueurRestante;
 
-        let longueurUtilisee = nbLongueur * lr;
-
-        longueurRestante -= longueurUtilisee;
+        if(rentre){
+            longueurRestante -= longueurUtilisee;
+            totalGlobal += quantite;
+        }
 
         let row = `
         <tr>
         <td>${nom}</td>
         <td>${d*1000}</td>
+        <td>${quantite}</td>
         <td>${typeBloc}</td>
         <td>${longueurUtilisee.toFixed(2)} m</td>
-        <td>${total}</td>
+        <td>${rentre ? "✅ OK" : "❌ Ne rentre pas"}</td>
         </tr>
         `;
 
@@ -144,7 +166,8 @@ function calcul(){
     });
 
     document.getElementById("resultat").innerText =
-        "✅ Total réel = " + totalGlobal + " rolls | Longueur restante = " + longueurRestante.toFixed(2) + " m";
+        "✅ Total chargé = " + totalGlobal + 
+        " rolls | Longueur restante = " + longueurRestante.toFixed(2) + " m";
 
     document.getElementById("detail").style.display = "table";
 }
